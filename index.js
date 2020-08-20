@@ -7,8 +7,8 @@ canvas.width = 1200;
 canvas.height = 600;
 
 //isso define o tamanho do grip
-const COLS = canvas.width / resolution;
-const ROWS = canvas.height / resolution;
+const COLS = canvas.width / resolution/2;
+const ROWS = canvas.height / resolution/2;
 
 //função para gerar numero aleatorio entre min e max
 function randomNums(min, max) {
@@ -17,15 +17,47 @@ function randomNums(min, max) {
 
 //classe responsável por ser um PMC
 class Pmc{
-	constructor(l,x,y,s) {
+	constructor(l,x,y,s,a,c,p,e,be,bd,pe,pd) {
+		//informações do desenho e posição
 		this.largura=l;
 		this.posX=x;
 		this.posXAnt=x;
 		this.posY=y;
 		this.posYAnt=y;
-		this.speed=s;	
+		//informações relacionadas a velocidade de movimento
+		this.speedBase=s;		
+		this.speed=s;
+		this.stamina=a;
+		//informações relacionadas a vida das partes do corpo
+		this.cabeca=c;
+		this.peitoral=p;
+		this.estomago=e;
+		this.bracoEsq=be;
+		this.bracoDir=bd;
+		this.pernaEsq=pe;
+		this.pernaDir=pd;
+		this.cabecaAtual=c;
+		this.peitoralAtual=p;
+		this.estomagoAtual=e;
+		this.bracoEsqAtual=be;
+		this.bracoDirAtual=bd;
+		this.pernaEsqAtual=pe;
+		this.pernaDirAtual=pd;
 	}
-	
+	movimenta(){
+		if(this.stamina>0){
+			this.speed = this.speedBase*2;
+			this.stamina = this.stamina-1;
+			this.correndo = true;
+		}
+		else{
+			this.speed = this.speedBase;
+			if(this.stamina<this.staminaBase){
+				this.stamina = this.stamina+1;
+			}
+			this.correndo = false;
+		}
+	}
 	checaMovimento(grid,x,y,l){
 		for(let i=Math.max(x-l,0); i<x+l; i++){
 			for(let j=Math.max(y-l,0); j<y+l; j++){
@@ -126,7 +158,12 @@ function buildGrid() {
 	return grid;
 }
 let grid = buildGrid();
-let pmc1 = new Pmc(3,2,2,2);
+let pmc1 = new Pmc(3,2,2,2,100,50,85,85,100,100,100,100);
+let ajusteX = 140;
+let ajusteY = 0;
+//renderiza os textos do UI dos PMC
+renderTextosVida(pmc1)
+
 //atualiza a tela usando a função update
 requestAnimationFrame(update);
 
@@ -134,18 +171,72 @@ requestAnimationFrame(update);
 function update() {
 	pmc1.moveBaixo(grid);
 	grid = pmc1.atualizaGridPMC(grid);
-	render(grid);
+	renderPMCInfos(pmc1);
+	render(grid,ajusteX,ajusteY);
 	requestAnimationFrame(update);
 }
 
+//renderiza as informaçoes do PMC enviado
+function renderPMCInfos(pmc) {
+      renderVida(pmc.cabecaAtual,pmc.cabeca,1);
+      renderVida(pmc.peitoralAtual,pmc.peitoral,2);
+      renderVida(pmc.estomagoAtual,pmc.estomago,3);
+      renderVida(pmc.bracoDirAtual,pmc.bracoDir,4);
+      renderVida(pmc.bracoEsqAtual,pmc.bracoEsq,5);
+      renderVida(pmc.pernaDirAtual,pmc.pernaDir,6);
+      renderVida(pmc.pernaEsqAtual,pmc.pernaEsq,7);
+    
+  }
+//renderiza apenas os textos da vida
+function renderTextosVida() {
+      renderTextoVida("Cabeça",1);
+      renderTextoVida("Peitoral",2);
+      renderTextoVida("Estomago",3);
+      renderTextoVida("Braço Direito",4);
+      renderTextoVida("Braço Esquerdo",5);
+      renderTextoVida("Perna Direita",6);
+      renderTextoVida("Perna Esquerda",7);
+    
+  }
+//renderiza barra de vida com os valores enviados
+function renderVida(atual, total, pos) {
+	
+    ctx.beginPath();
+	per=100*(atual/total);
+	ctx.clearRect(0, pos*30, 100, 5);
+    ctx.rect(0, pos*30, per, 5);
+    if(per > 63){
+        ctx.fillStyle="green"
+    }else if(per > 37){
+        ctx.fillStyle="gold"
+    }else if(per > 13){
+      ctx.fillStyle="orange";
+    }else{
+      ctx.fillStyle="red";
+    }
+    ctx.fill();
+    ctx.closePath();
+	
+  }
+  
+//renderiza os textos acima das barras de vida
+function renderTextoVida(nome,pos) {
+	
+    ctx.beginPath();
+	ctx.font = "12px Arial";
+	ctx.fillText(nome, 0, pos*30 - 3); 
+    ctx.fillStyle="black";
+    ctx.closePath();
+    
+  }
 //renderiza as informaçoes na tela
-function render(grid) {
+function render(grid,x,y) {
   for (let col = 0; col < grid.length; col++) {
     for (let row = 0; row < grid[col].length; row++) {
       const cell = grid[col][row];
 
       ctx.beginPath();
-      ctx.rect(col * resolution, row * resolution, resolution, resolution);
+      ctx.rect(col * resolution + x, row * resolution+y, resolution, resolution);
 	  if(cell==0){
 		  ctx.fillStyle = 'white'
 	  }
@@ -159,6 +250,7 @@ function render(grid) {
 		  ctx.fillStyle = 'blue'
 	  }
       ctx.fill();
+      ctx.closePath();
       // ctx.stroke();
     }
   }

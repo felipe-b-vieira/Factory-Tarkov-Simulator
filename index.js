@@ -111,6 +111,70 @@ class Pmc{
 		}
 		return grid;
 	}
+
+	//função de pathfinding a*
+	encontraCaminhoPFA(inicioX,inicioY, fimX,fimY,grid){
+		//listas abertas dos caminhos
+		let abertosX=[inicioX];
+		let abertosY=[inicioY];
+		
+		//lista se o ponto está aberto ou não
+		let aberto = new Array(grid.length).fill(null)
+		.map(() => new Array(grid[0].length).fill(null)
+		  .map(() => 0));;
+		aberto[inicioX][inicioY]=1;
+
+		
+		//distancia do ponto inicial
+		let dist = new Array(grid.length).fill(null)
+		.map(() => new Array(grid[0].length).fill(null)
+		  .map(() => 0));;
+		dist[inicioX][inicioY]=0;
+
+		//distancia do ponto final
+		let distF = new Array(grid.length).fill(null)
+		.map(() => new Array(grid[0].length).fill(null)
+		  .map(() => 0));;
+		distF[inicioX][inicioY]=0;
+
+		//custo total
+		let custo = new Array(grid.length).fill(null)
+		.map(() => new Array(grid[0].length).fill(null)
+		  .map(() => 0));;
+		custo[inicioX][inicioY]=0;
+
+		while(abertosX.length>0 && abertosY.length>0){
+
+			//pego os valores abertos com menor f
+			primValX = abertosX[0];
+			abertosX.shift();
+			primValY = abertosY[0];
+			abertosY.shift();
+
+			//verifica se pegou o resultado
+
+			//pega os vizinhos
+
+			//verifica cada vizinho
+			for(let v=0;v<vizinhos.length;v++){
+				//verifica se o vizinho pode ser vizitado
+				if(grid[vizinhos[v].x][vizinhos[v].y]==1 || aberto[vizinhos[v].x][vizinhos[v].y]==1){
+					continue
+				}
+				
+				//calculo do g
+				dist[vizinhos[v].x][vizinhos[v].y] = dist[primValX][primValY]+1
+				//calculo do h
+				distF[vizinhos[v].x][vizinhos[v].y] = (fimX-vizinhos[v].x)*(fimX-vizinhos[v].x) + (fimY-vizinhos[v].y)*(fimY-vizinhos[v].y)
+				//calculo do f
+				custo[vizinhos[v].x][vizinhos[v].y] = distF[vizinhos[v].x][vizinhos[v].y] + dist[vizinhos[v].x][vizinhos[v].y]
+				//verifica se é mais barato ou melhor
+
+				//adiciona a lista de abertos ordenado por f
+			}
+		}
+
+	}
 }
 	
 	
@@ -121,12 +185,12 @@ function buildGrid() {
       .map(() => 0));
 	
 	//cria bloqueios
-	maxTamBloqueioX=50;
-	maxTamBloqueioY=50;
-	minTamBloqueioX=10;
-	minTamBloqueioY=10;
-	maxQuantBloqueios = 100;
-	minQuantBloqueios = 25;
+	maxTamBloqueioX=40;
+	maxTamBloqueioY=40;
+	minTamBloqueioX=7;
+	minTamBloqueioY=7;
+	maxQuantBloqueios = 25;
+	minQuantBloqueios = 10;
 	quantBloqueios = randomNums(minQuantBloqueios,maxQuantBloqueios)
 	for(let bloq=0; bloq<quantBloqueios; bloq++){
 		xTam = randomNums(minTamBloqueioX,maxTamBloqueioX);
@@ -158,7 +222,7 @@ function buildGrid() {
 	return grid;
 }
 let grid = buildGrid();
-let pmc1 = new Pmc(3,2,2,2,100,50,85,85,100,100,100,100);
+let pmc1 = new Pmc(2,2,2,2,100,50,85,85,100,100,100,100);
 let ajusteX = 140;
 let ajusteY = 0;
 //renderiza os textos do UI dos PMC
